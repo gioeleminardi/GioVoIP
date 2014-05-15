@@ -4,6 +4,5 @@
 
 void main(){
 	Server srv;
-	//TEST sync GITHUB
 	system("PAUSE");
 }

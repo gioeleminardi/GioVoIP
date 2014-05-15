@@ -32,13 +32,22 @@ int Server::initSocket(){
 		return -1;
 	}
 
-
+	iResult = bind(listenSocket, result->ai_addr, (int)result->ai_addrlen);
+	if(iResult == SOCKET_ERROR){
+		printf("Fallito il bind del socket: %s\n", WSAGetLastError());
+		freeaddrinfo(result);
+		closesocket(listenSocket);
+		WSACleanup();
+		return -1;
+	}
+	freeaddrinfo(result);
 	return 0;
 }
 
 Server::Server(void){
 	if(initSocket() == 0){
-		printf("Init socket complete\n");
+		printf("Socket inizializzato\n");
+		printf("Socket bindato\n");
 	}
 }
 
