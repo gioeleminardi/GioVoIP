@@ -4,6 +4,11 @@ int Server::initSocket(){
 	WSADATA wsaData;
 	struct addrinfo *result = NULL, *ptr = NULL, hints;
 	SOCKET listenSocket = INVALID_SOCKET;
+	SOCKADDR_STORAGE from;
+	int bytecount, fromlen, retval;
+	char buffer[1024],     
+	servstr[NI_MAXSERV],
+    hoststr[NI_MAXHOST];
 
 	int iResult = WSAStartup(MAKEWORD(3,2), &wsaData);
 	if(iResult != 0){
@@ -41,6 +46,38 @@ int Server::initSocket(){
 		return -1;
 	}
 	freeaddrinfo(result);
+	for(;;){
+		fromlen = sizeof(from);
+		bytecount = recvfrom(listenSocket, buffer, sizeof(buffer), 0, (SOCKADDR *)&from, &fromlen);
+		if (bytecount == SOCKET_ERROR)
+		{
+			if (WSAGetLastError() != WSAECONNRESET) {
+				fprintf(stderr, "recvfrom failed; %d\n", WSAGetLastError());
+				freeaddrinfo(result);
+				closesocket(listenSocket);
+				WSACleanup();
+			} else {
+				continue;
+			}
+		}
+		retval = getnameinfo(
+                                (SOCKADDR *)&from,
+                                fromlen,
+                                hoststr,
+                                NI_MAXHOST,
+                                servstr,
+                                NI_MAXSERV,
+                                NI_NUMERICHOST | NI_NUMERICSERV
+                                );
+		if (retval != 0){
+			fprintf(stderr, "getnameinfo failed: %d\n", retval);
+			freeaddrinfo(result);
+			closesocket(listenSocket);
+			WSACleanup();
+        }
+		printf("read %d bytes from host %s and port %s\n", bytecount, hoststr, servstr);
+	}
+
 	return 0;
 }
 
