@@ -4,7 +4,8 @@
 class Server
 {
 private:
-	int initSocket();
+	SOCKET initSocket();
+	void startUDPlisten(SOCKET s);
 public:
 	Server(void);
 	~Server(void);
